@@ -99,11 +99,35 @@ local function depositItems()
   end
 end
 
--- Fuel management
+local function checkFuel()
+  local success, fuelLevel = pcall(turtle.getFuelLevel)
+  if not success then
+    print("Error getting fuel level: " .. tostring(fuelLevel))
+    return false
+  end
+  
+  if type(fuelLevel) ~= "number" then
+    print("Unexpected fuel level type: " .. type(fuelLevel))
+    return false
+  end
+
+  local fuelNeeded = config.width * config.length * config.height
+  if fuelLevel < fuelNeeded then
+    print("Low fuel. Current: " .. fuelLevel .. ", Needed: " .. fuelNeeded)
+    print("Attempting to refuel...")
+    if not refuel() then
+      print("Out of fuel!")
+      return false
+    end
+  end
+  return true
+end
+
 local function refuel()
   for slot = 1, 16 do
     turtle.select(slot)
-    if turtle.refuel(0) then
+    local success, result = pcall(turtle.refuel, 0)
+    if success and result then
       local fuelLevel = turtle.getFuelLevel()
       local needed = config.width * config.length * config.height - fuelLevel
       if needed > 0 then
@@ -113,18 +137,6 @@ local function refuel()
     end
   end
   return false
-end
-
-local function checkFuel()
-  local fuelLevel = turtle.getFuelLevel()
-  if fuelLevel < config.width * config.length * config.height then
-    print("Low fuel. Attempting to refuel...")
-    if not refuel() then
-      print("Out of fuel!")
-      return false
-    end
-  end
-  return true
 end
 
 -- Function for a single turtle to mine a layer
