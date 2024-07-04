@@ -1,14 +1,22 @@
--- Import required modules
-local term = require("term")
+-- Configuration
+local config = {
+  width = 16,
+  length = 16,
+  height = 5,
+  chestSide = "down"
+}
 
 -- Load configuration
-local config = {}
 local function loadConfig()
   local file = fs.open("mining_config.txt", "r")
   if file then
     local data = textutils.unserialize(file.readAll())
     file.close()
-    if data then config = data end
+    if data then 
+      for k, v in pairs(data) do
+        config[k] = v
+      end
+    end
   end
 end
 
